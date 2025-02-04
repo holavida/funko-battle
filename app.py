@@ -7,12 +7,23 @@ from web3 import Web3
 import json
 import random
 
-# Cargar variables de entorno
-load_dotenv()
+# Cargar variables de entorno solo en desarrollo
+if os.path.exists('.env'):
+    load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///funko_battle.db')
+
+# Configuración de la base de datos
+if os.environ.get('RENDER'):
+    # Configuración para Render
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', '').replace('postgres://', 'postgresql://')
+else:
+    # Configuración local
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///funko_battle.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-key-123')
+
 db = SQLAlchemy(app)
 
 # Modelos
