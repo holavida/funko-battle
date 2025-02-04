@@ -14,17 +14,13 @@ if os.path.exists('.env'):
 app = Flask(__name__)
 
 # Configuración de la base de datos
-if os.environ.get('RENDER'):
-    # Configuración para Render con PostgreSQL
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
+if os.environ.get('PYTHONANYWHERE_DOMAIN'):
+    # Configuración para PythonAnywhere
+    username = os.environ.get('PYTHONANYWHERE_USERNAME', 'your_username')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{username}:{username}@{username}.mysql.pythonanywhere-services.com/{username}$funko_battle'
 else:
-    # Configuración local con SQLite
+    # Configuración local
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///funko_battle.db'
-
-if not app.config['SQLALCHEMY_DATABASE_URI']:
-    raise ValueError("No database URI configured!")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-key-123')
