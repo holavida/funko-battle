@@ -15,16 +15,24 @@ app = Flask(__name__)
 
 # Configuración de la base de datos
 if os.environ.get('RENDER'):
-    # Configuración para Render
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', '').replace('postgres://', 'postgresql://')
+    # Configuración para Render con PostgreSQL
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
 else:
-    # Configuración local
+    # Configuración local con SQLite
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///funko_battle.db'
+
+if not app.config['SQLALCHEMY_DATABASE_URI']:
+    raise ValueError("No database URI configured!")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-key-123')
 
 db = SQLAlchemy(app)
+
+with app.app_context():
+    db.create_all()
 
 # Modelos
 class User(db.Model):
@@ -204,6 +212,4 @@ def generate_ai_opponent():
     }
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)

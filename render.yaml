@@ -9,7 +9,9 @@ services:
         value: 3.10.0
       - key: FLASK_SECRET_KEY
         generateValue: true
-      - key: DATABASE_URL
-        value: sqlite:///funko_battle.db
       - key: TELEGRAM_BOT_TOKEN
         sync: false
+    databases:
+      - name: funko_battle_db
+        databaseName: funko_battle
+        user: funko_battle
